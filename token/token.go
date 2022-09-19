@@ -1,7 +1,5 @@
 package token
 
-import "go/token"
-
 type TokenType string
 
 const (
