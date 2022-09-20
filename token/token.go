@@ -11,15 +11,18 @@ const (
 	INT   = "INT"   // 1234
 
 	// binary operator
-	ASSIGN = "="
-	PLUS   = "+"
-	MINUS = "-"
-	BANG = "!"
+	ASSIGN   = "="
+	PLUS     = "+"
+	MINUS    = "-"
+	BANG     = "!"
 	ASTERISK = "*"
-	SLASH = "/"
+	SLASH    = "/"
 
 	LT = "<"
 	GT = ">"
+
+	EQ     = "=="
+	NOT_EQ = "!="
 
 	// split
 	COMMA     = ","
@@ -33,6 +36,11 @@ const (
 	// 关键字
 	FUNCTION = "FUNCTION"
 	LET      = "LET"
+	TRUE     = "TRUE"
+	FALSE    = "FALSE"
+	IF       = "IF"
+	ELSE     = "ELSE"
+	RETURN   = "RETURN"
 )
 
 type Token struct {
@@ -41,8 +49,13 @@ type Token struct {
 }
 
 var keywords = map[string]TokenType{
-	"fn":  FUNCTION,
-	"let": LET,
+	"fn":     FUNCTION,
+	"let":    LET,
+	"true":   TRUE,
+	"false":  FALSE,
+	"if":     IF,
+	"else":   ELSE,
+	"return": RETURN,
 }
 
 func LookupIdent(ident string) TokenType {
