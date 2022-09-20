@@ -13,6 +13,13 @@ const (
 	// binary operator
 	ASSIGN = "="
 	PLUS   = "+"
+	MINUS = "-"
+	BANG = "!"
+	ASTERISK = "*"
+	SLASH = "/"
+
+	LT = "<"
+	GT = ">"
 
 	// split
 	COMMA     = ","
