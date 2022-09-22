@@ -62,13 +62,15 @@ func (p *Parser) ParseProgram() *ast.Program {
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.LET:
-		return p.parseLerStatement()
+		return p.parseLetStatement()
+	case token.RETURN:
+		return p.parseReturnStatement()
 	default:
 		return nil
 	}
 }
 
-func (p *Parser) parseLerStatement() *ast.LetStatement {
+func (p *Parser) parseLetStatement() *ast.LetStatement {
 	s := &ast.LetStatement{Token: p.curToken}
 
 	if !p.exceptPeek(token.IDENT) {
@@ -106,4 +108,18 @@ func (p *Parser) exceptPeek(t token.TokenType) bool {
 		p.peekErrors(t)
 		return false
 	}
+}
+
+
+func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
+	s := &ast.ReturnStatement{Token: p.curToken}
+	p.nextToken()
+
+	// TODO parse expression
+
+	for !p.curTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return s	
 }
