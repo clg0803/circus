@@ -131,7 +131,7 @@ func (i *IntegerLiteral) String() string       { return i.Token.Literal }
 
 // PREFIX EXPR: `!x`
 type PrefixExpression struct {
-	Token    token.Token 	// '!'
+	Token    token.Token // '!'
 	Operator string
 	Right    Expression
 }
@@ -144,6 +144,27 @@ func (p *PrefixExpression) String() string {
 	out.WriteString("(")
 	out.WriteString(p.Operator)
 	out.WriteString(p.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}
+
+type InfixExpression struct {
+	Token    token.Token
+	Left     Expression
+	Operator string
+	Right    Expression
+}
+
+func (ie *InfixExpression) expressionNode()      {}
+func (ie *InfixExpression) TokenLiteral() string { return ie.Token.Literal }
+func (ie *InfixExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(ie.Left.String())
+	out.WriteString(" " + ie.Operator+ " ")
+	out.WriteString(ie.Right.String())
 	out.WriteString(")")
 
 	return out.String()
