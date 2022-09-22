@@ -14,11 +14,13 @@ import (
 
 func TestOperatorPrecedenceParsing(t *testing.T) {
 	tests := []struct {
-		input           string
-		expectedBoolean bool
+		input    string
+		expected string
 	}{
-		{"true;", true},
-		{"false;", false},
+        {
+            "1 + (2 + 3) + 4",
+            "((1 + (2 + 3)) + 4)",
+        },
 	}
 
 	for _, tt := range tests {
@@ -27,27 +29,13 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
-		if len(program.Statements) != 1 {
-			t.Fatalf("program has not enough statements. got=%d",
-				len(program.Statements))
-		}
-
-		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-		if !ok {
-			t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
-				program.Statements[0])
-		}
-
-		boolean, ok := stmt.Expression.(*ast.Boolean)
-		if !ok {
-			t.Fatalf("exp not *ast.Boolean. got=%T", stmt.Expression)
-		}
-		if boolean.Value != tt.expectedBoolean {
-			t.Errorf("boolean.Value not %t. got=%t", tt.expectedBoolean,
-				boolean.Value)
+		actual := program.String()
+		if actual != tt.expected {
+			t.Errorf("expected=%q, got=%q", tt.expected, actual)
 		}
 	}
 }
+
 
 func checkParserErrors(t *testing.T, p *Parser) {
 	e := p.Errors()
