@@ -3,57 +3,43 @@ package parser
 import (
 	"testing"
 
-	"github.com/clg0803/circus/ast"
 	"github.com/clg0803/circus/lexer"
+	"github.com/clg0803/circus/ast"
 )
 
-func TestLetStatements(t *testing.T) {
-	input := `
-		return 5;
-		return 10;
-		return 991 332;
-	`
-	l := lexer.New(input)
-	p := New(l)
+// parser/parser_test.go
 
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+// parser/parser_test.go
 
-	if program == nil {
-		t.Fatalf("ParserProgram return nil")
-	}
-	
-	if len(program.Statements) != 3 {
-		t.Fatalf("program.Statements does not contain 3 statements, got =  %d ",
-			len(program.Statements))
-	}
+func TestIntegerLiteralExpression(t *testing.T) {
+    input := "5;"
 
-	// tests := []struct {
-	// 	expectedIdentifier string
-	// }{
-	// 	{"x"},
-	// 	{"y"},
-	// 	{"foobar"},
-	// }
+    l := lexer.New(input)
+    p := New(l)
+    program := p.ParseProgram()
+    checkParserErrors(t, p)
 
-	// for i, tt := range tests {
-	// 	s := program.Statements[i]
-	// 	if !testLetStatement(t, s, tt.expectedIdentifier) {
-	// 		return
-	// 	}
-	// }
+    if len(program.Statements) != 1 {
+        t.Fatalf("program has not enough statements. got=%d",
+            len(program.Statements))
+    }
+    stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+    if !ok {
+        t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+            program.Statements[0])
+    }
 
-	for _, s := range program.Statements {
-		rs, ok := s.(*ast.ReturnStatement)
-		if !ok {
-			t.Errorf("s not *ast.ReturnStatement, got %T", s)
-			continue
-		}
-		if rs.TokenLiteral() != "return" {
-			t.Errorf("returnStatement.Tokenliteral not 'return', got %q", 
-			rs.TokenLiteral())
-		}
-	}
+    literal, ok := stmt.Expression.(*ast.IntegerLiteral)
+    if !ok {
+        t.Fatalf("exp not *ast.IntegerLiteral. got=%T", stmt.Expression)
+    }
+    if literal.Value != 5 {
+        t.Errorf("literal.Value not %d. got=%d", 5, literal.Value)
+    }
+    if literal.TokenLiteral() != "5" {
+        t.Errorf("literal.TokenLiteral not %s. got=%s", "5",
+            literal.TokenLiteral())
+    }
 }
 
 func checkParserErrors(t *testing.T, p *Parser) {
@@ -67,27 +53,4 @@ func checkParserErrors(t *testing.T, p *Parser) {
 		}
 		t.FailNow()
 	}
-}
-
-func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
-	if s.TokenLiteral() != "let" {
-		t.Errorf("s.TokenLiteral not 'let', got =%q", s.TokenLiteral())
-		return false
-	}
-
-	ls, ok := s.(*ast.LetStatement)
-	if !ok {
-		t.Errorf("s not *ast.LetStatement, got = %T", s)
-		return false
-	}
-	if ls.Name.Value != name {
-		t.Errorf("ls.Name.Value not '%s', got = %s", name, ls.Name.Value)
-		return false
-	}
-	if ls.Name.TokenLiteral() != name {
-		t.Errorf("ls.Name.TokenLiteral() not '%s', got = %s", name, ls.Name.TokenLiteral())
-		return false
-	}
-
-	return true
 }
