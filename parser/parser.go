@@ -110,16 +110,15 @@ func (p *Parser) exceptPeek(t token.TokenType) bool {
 	}
 }
 
-
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	s := &ast.ReturnStatement{Token: p.curToken}
 	p.nextToken()
 
-	// TODO parse expression
+	// TODO: parse expression
 
 	for !p.curTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 
-	return s	
+	return s
 }
