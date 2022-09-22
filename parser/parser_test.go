@@ -8,14 +8,27 @@ import (
 	"github.com/clg0803/circus/lexer"
 )
 
-func TestFunctionParameterParsing(t *testing.T) {
+func TestCallExpressionParameterParsing(t *testing.T) {
 	tests := []struct {
-		input          string
-		expectedParams []string
+		input         string
+		expectedIdent string
+		expectedArgs  []string
 	}{
-		{input: "fn() {};", expectedParams: []string{}},
-		{input: "fn(x) {};", expectedParams: []string{"x"}},
-		{input: "fn(x, y, z) {};", expectedParams: []string{"x", "y", "z"}},
+		{
+			input:         "add();",
+			expectedIdent: "add",
+			expectedArgs:  []string{},
+		},
+		{
+			input:         "add(1);",
+			expectedIdent: "add",
+			expectedArgs:  []string{"1"},
+		},
+		{
+			input:         "add(1, 2 * 3, 4 + 5);",
+			expectedIdent: "add",
+			expectedArgs:  []string{"1", "(2 * 3)", "(4 + 5)"},
+		},
 	}
 
 	for _, tt := range tests {
@@ -25,15 +38,26 @@ func TestFunctionParameterParsing(t *testing.T) {
 		checkParserErrors(t, p)
 
 		stmt := program.Statements[0].(*ast.ExpressionStatement)
-		function := stmt.Expression.(*ast.FunctionLiteral)
-
-		if len(function.Parameters) != len(tt.expectedParams) {
-			t.Errorf("length parameters wrong. want %d, got=%d\n",
-				len(tt.expectedParams), len(function.Parameters))
+		exp, ok := stmt.Expression.(*ast.CallExpression)
+		if !ok {
+			t.Fatalf("stmt.Expression is not ast.CallExpression. got=%T",
+				stmt.Expression)
 		}
 
-		for i, ident := range tt.expectedParams {
-			testLiteralExpression(t, function.Parameters[i], ident)
+		if !testIdentifier(t, exp.Function, tt.expectedIdent) {
+			return
+		}
+
+		if len(exp.Arguments) != len(tt.expectedArgs) {
+			t.Fatalf("wrong number of arguments. want=%d, got=%d",
+				len(tt.expectedArgs), len(exp.Arguments))
+		}
+
+		for i, arg := range tt.expectedArgs {
+			if exp.Arguments[i].String() != arg {
+				t.Errorf("argument %d wrong. want=%q, got=%q", i,
+					arg, exp.Arguments[i].String())
+			}
 		}
 	}
 }
