@@ -83,9 +83,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 	for p.curToken.Type != token.EOF {
 		s := p.parseStatement()
-		if s != nil {
-			program.Statements = append(program.Statements, s)
-		}
+		program.Statements = append(program.Statements, s)
 		p.nextToken()
 	}
 
