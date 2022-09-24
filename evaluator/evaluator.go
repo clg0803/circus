@@ -8,7 +8,7 @@ import (
 func Eval(node ast.Node) object.Object {
 	switch node := node.(type) {
 	case *ast.Program:
-		return evalStatements(node.Statements)
+		return evalProgram(node)
 	case *ast.ExpressionStatement:
 		return Eval(node.Expression)
 	case *ast.IntegerLiteral:
@@ -25,7 +25,7 @@ func Eval(node ast.Node) object.Object {
 	case *ast.IfExpression:
 		return evalIfExpression(node)
 	case *ast.BlockStatement:
-		return evalStatements(node.Statements)
+		return evalBlockStatement(node)
 	case *ast.ReturnStatement:
 		val := Eval(node.ReturnValue)
 		return &object.ReturnValue{Value: val}
@@ -33,9 +33,9 @@ func Eval(node ast.Node) object.Object {
 	return NULL
 }
 
-func evalStatements(s []ast.Statement) object.Object {
+func evalProgram(p *ast.Program) object.Object {
 	var ans object.Object
-	for _, sm := range s {
+	for _, sm := range p.Statements {
 		ans = Eval(sm)
 
 		if rv, ok := ans.(*object.ReturnValue); ok {
@@ -155,4 +155,18 @@ func isTruthy(con object.Object) bool {
 	default:
 		return true
 	}
+}
+
+func evalBlockStatement(b *ast.BlockStatement) object.Object {
+	var ans object.Object
+
+	for _, s := range b.Statements {
+		ans = Eval(s)
+		if ans != nil &&
+			ans.Type() == object.RETURN_VALUE_OBJ { // inner return
+			return ans
+		}
+	}
+
+	return ans
 }
