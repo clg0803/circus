@@ -23,7 +23,7 @@ func Eval(node ast.Node) object.Object {
 		right := Eval(node.Right)
 		return evalInfixExpression(node.Operator, Left, right)
 	}
-	return nil
+	return NULL
 }
 
 func evalStatements(s []ast.Statement) object.Object {
@@ -65,8 +65,12 @@ func evalInfixExpression(op string,
 	case left.Type() == object.INTEGER_OBJ &&
 		right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(op, left, right)
+	case op == "==":
+		return nativeBoolToBooleanObjects(left == right)
+	case op == "!=":
+		return nativeBoolToBooleanObjects(left != right)
 	default:
-		return nil
+		return NULL
 	}
 }
 
@@ -84,15 +88,15 @@ func evalIntegerInfixExpression(op string,
 	case "/":
 		return &object.Integer{Value: lv / rv}
 	case "<":
-		return &object.Boolean{Value: lv < rv}
+		return nativeBoolToBooleanObjects(lv < rv)
 	case ">":
-		return &object.Boolean{Value: lv > rv}
+		return nativeBoolToBooleanObjects(lv > rv)
 	case "==":
-		return &object.Boolean{Value: lv == rv}
+		return nativeBoolToBooleanObjects(lv == rv)
 	case "!=":
-		return &object.Boolean{Value: lv != rv}
+		return nativeBoolToBooleanObjects(lv != rv)
 	default:
-		return nil
+		return NULL
 	}
 }
 
