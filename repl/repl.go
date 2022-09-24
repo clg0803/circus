@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/clg0803/circus/evaluator"
 	"github.com/clg0803/circus/lexer"
 	"github.com/clg0803/circus/parser"
 )
@@ -30,8 +31,12 @@ func Start(in io.Reader, out io.Writer) {
 			printParserErrors(out, p.Errors())
 			continue
 		}
-		io.WriteString(out, program.String())
-		io.WriteString(out, "\n")
+
+		eval := evaluator.Eval(program)
+		if eval != nil {
+			io.WriteString(out, eval.Inspect())
+			io.WriteString(out, "\n")
+		}
 	}
 }
 
@@ -51,10 +56,10 @@ const MONKEY_FACE = `            __,__
 `
 
 func printParserErrors(out io.Writer, errors []string) {
-    io.WriteString(out, MONKEY_FACE)
-    io.WriteString(out, "Woops! We ran into some monkey business here!\n")
-    io.WriteString(out, " parser errors:\n")
-    for _, msg := range errors {
-        io.WriteString(out, "\t"+msg+"\n")
-    }
+	io.WriteString(out, MONKEY_FACE)
+	io.WriteString(out, "Woops! We ran into some monkey business here!\n")
+	io.WriteString(out, " parser errors:\n")
+	for _, msg := range errors {
+		io.WriteString(out, "\t"+msg+"\n")
+	}
 }
