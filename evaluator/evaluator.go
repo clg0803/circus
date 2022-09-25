@@ -17,6 +17,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return &object.Integer{Value: node.Value}
 	case *ast.Boolean:
 		return nativeBoolToBooleanObjects(node.Value)
+	case *ast.StringLiteral:
+		return &object.String{Value: node.Value}
 	case *ast.PrefixExpression:
 		right := Eval(node.Right, env)
 		if isError(right) {
@@ -170,6 +172,9 @@ func evalInfixExpression(op string,
 	case left.Type() == object.INTEGER_OBJ &&
 		right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(op, left, right)
+	case left.Type() == object.STRING_OBJ &&
+		right.Type() == object.STRING_OBJ:
+		return evalStringInfixExpression(op, left, right)
 	case op == "==":
 		return nativeBoolToBooleanObjects(left == right)
 	case op == "!=":
@@ -204,8 +209,20 @@ func evalIntegerInfixExpression(op string,
 	case "!=":
 		return nativeBoolToBooleanObjects(lv != rv)
 	default:
-		return newError("unknown operator: %s %s %s", left.Type(), op, right.Type())
+		return newError("unknown operator: %s %s %s",
+			left.Type(), op, right.Type())
 	}
+}
+
+func evalStringInfixExpression(op string,
+	left object.Object, right object.Object) object.Object {
+	if op != "+" {
+		return newError("unknown operator: %s %s %s",
+			left.Type(), op, right.Type())
+	}
+	lv := left.(*object.String).Value
+	rv := right.(*object.String).Value
+	return &object.String{Value: lv + rv}
 }
 
 func evalBangOperatorExpression(right object.Object) object.Object {
