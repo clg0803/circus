@@ -12,6 +12,8 @@ import (
 
 type ObjectType string
 
+type BuiltinFunction func(args ...Object) Object //  内置函数
+
 const (
 	INTEGER_OBJ = "INTEGER"
 	BOOLEAN_OBJ = "BOOLEAN"
@@ -23,12 +25,21 @@ const (
 	ERROR_OBJ = "ERROR"
 
 	FUNCTION_OBJ = "FUNCTION"
+
+	BUILTIN_OBJ = "BUILTIN"
 )
 
 type Object interface {
 	Type() ObjectType
 	Inspect() string
 }
+
+type Builtin struct {
+	Fn BuiltinFunction
+}
+
+func (b *Builtin) Type() ObjectType { return BUILTIN_OBJ }
+func (b *Builtin) Inspect() string  { return "builtin function" }
 
 type Integer struct {
 	Value int64

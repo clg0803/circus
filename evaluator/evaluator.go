@@ -76,13 +76,16 @@ func isError(obj object.Object) bool { return obj != nil && obj.Type() == object
 
 func applyFunction(fn object.Object,
 	args []object.Object) object.Object {
-	f, ok := fn.(*object.Function)
-	if !ok {
+	switch fn := fn.(type) {
+	case *object.Function:
+		eEnv := extendFunctionEnv(fn, args)
+		eva := Eval(fn.Body, eEnv)
+		return unwrapReturnValue(eva)
+	case *object.Builtin:
+		return fn.Fn(args...)
+	default:
 		return newError("not a function: %s", fn.Type())
 	}
-	eEnv := extendFunctionEnv(f, args)
-	eva := Eval(f.Body, eEnv)
-	return unwrapReturnValue(eva)
 }
 
 func extendFunctionEnv(fn *object.Function,
@@ -118,12 +121,15 @@ func evalExpression(args []ast.Expression,
 
 func evalIdentifier(node *ast.Identifier,
 	env *object.Environment) object.Object {
-	val, ok := env.Get(node.Value)
-	if !ok {
-		return newError("identifier not found: " + node.Value)
+	if val, ok := env.Get(node.Value); ok {
+		return val
 	}
 
-	return val
+	if builtin, ok := builtins[node.Value]; ok {
+		return builtin
+	}
+
+	return newError("identifier not found: " + node.Value)
 }
 
 func evalProgram(p *ast.Program, env *object.Environment) object.Object {
