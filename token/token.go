@@ -7,8 +7,9 @@ const (
 	EOF     = "EOF"
 
 	// 标识符 + 字面量
-	IDENT = "IDENT" // add foo x y ...
-	INT   = "INT"   // 1234
+	IDENT  = "IDENT" // add foo x y ...
+	INT    = "INT"   // 1234
+	STRING = "STRING"
 
 	// binary operator
 	ASSIGN   = "="
