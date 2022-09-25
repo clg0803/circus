@@ -7,6 +7,7 @@ import (
 
 	"github.com/clg0803/circus/evaluator"
 	"github.com/clg0803/circus/lexer"
+	"github.com/clg0803/circus/object"
 	"github.com/clg0803/circus/parser"
 )
 
@@ -15,6 +16,7 @@ const PROMPT = ">> "
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
+	env := object.NewEnvirnment()
 	for {
 		fmt.Fprint(out, PROMPT)
 		scanned := scanner.Scan()
@@ -32,7 +34,7 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		eval := evaluator.Eval(program)
+		eval := evaluator.Eval(program, env)
 		if eval != nil {
 			io.WriteString(out, eval.Inspect())
 			io.WriteString(out, "\n")

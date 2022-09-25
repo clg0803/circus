@@ -7,52 +7,69 @@ import (
 	"github.com/clg0803/circus/object"
 )
 
-func Eval(node ast.Node) object.Object {
+func Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
 	case *ast.Program:
-		return evalProgram(node)
+		return evalProgram(node, env)
 	case *ast.ExpressionStatement:
-		return Eval(node.Expression)
+		return Eval(node.Expression, env)
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
 	case *ast.Boolean:
 		return nativeBoolToBooleanObjects(node.Value)
 	case *ast.PrefixExpression:
-		right := Eval(node.Right)
+		right := Eval(node.Right, env)
 		if isError(right) {
 			return right
 		}
 		return evalPrefixExpression(node.Operator, right)
 	case *ast.InfixExpression:
-		left := Eval(node.Left)
+		left := Eval(node.Left, env)
 		if isError(left) {
 			return left
 		}
-		right := Eval(node.Right)
+		right := Eval(node.Right, env)
 		if isError(right) {
 			return right
 		}
 		return evalInfixExpression(node.Operator, left, right)
 	case *ast.IfExpression:
-		return evalIfExpression(node)
+		return evalIfExpression(node, env)
 	case *ast.BlockStatement:
-		return evalBlockStatement(node)
+		return evalBlockStatement(node, env)
 	case *ast.ReturnStatement:
-		val := Eval(node.ReturnValue)
+		val := Eval(node.ReturnValue, env)
 		if isError(val) {
 			return val
 		}
 		return &object.ReturnValue{Value: val}
+	case *ast.LetStatement:
+		val := Eval(node.Value, env)
+		if isError(val) {
+			return val
+		}
+		env.Set(node.Name.Value, val)
+	case *ast.Identifier:
+		return evalIdentifier(node, env)
 	}
 	return NULL
 }
 
 func isError(obj object.Object) bool { return obj != nil && obj.Type() == object.ERROR_OBJ }
 
-func evalProgram(p *ast.Program) object.Object {
+func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
+	val, ok := env.Get(node.Value)	
+	if !ok {
+		return newError("identifier not found: " + node.Value)
+	}
+
+	return val
+}
+
+func evalProgram(p *ast.Program, env *object.Environment) object.Object {
 	var ans object.Object
 	for _, sm := range p.Statements {
-		ans = Eval(sm)
+		ans = Eval(sm, env)
 
 		switch ans := ans.(type) {
 		case *object.ReturnValue:
@@ -155,15 +172,15 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 	return &object.Integer{Value: -v}
 }
 
-func evalIfExpression(ie *ast.IfExpression) object.Object {
-	con := Eval(ie.Condition)
+func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Object {
+	con := Eval(ie.Condition, env)
 	if isError(con) {
 		return con
 	}
 	if isTruthy(con) {
-		return Eval(ie.Consequence)
+		return Eval(ie.Consequence, env)
 	} else if ie.Alternative != nil {
-		return Eval(ie.Alternative)
+		return Eval(ie.Alternative, env)
 	} else {
 		return NULL
 	}
@@ -182,11 +199,11 @@ func isTruthy(con object.Object) bool {
 	}
 }
 
-func evalBlockStatement(b *ast.BlockStatement) object.Object {
+func evalBlockStatement(b *ast.BlockStatement, env *object.Environment) object.Object {
 	var ans object.Object
 
 	for _, s := range b.Statements {
-		ans = Eval(s)
+		ans = Eval(s, env)
 		if ans != nil {
 			if t := ans.Type(); t == object.RETURN_VALUE_OBJ || t == object.ERROR_OBJ {
 				return ans
