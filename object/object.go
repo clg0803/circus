@@ -3,6 +3,7 @@ package object
 import (
 	"bytes"
 	"fmt"
+	"hash/fnv"
 	"strings"
 
 	"github.com/clg0803/circus/ast"
@@ -15,14 +16,14 @@ type ObjectType string
 type BuiltinFunction func(args ...Object) Object //  内置函数
 
 const (
-	INTEGER_OBJ = "INTEGER"
-	BOOLEAN_OBJ = "BOOLEAN"
-	STRING_OBJ  = "STRING"
-	NULL_OBJ    = "NULL"
+	INTEGER_OBJ      = "INTEGER"
+	BOOLEAN_OBJ      = "BOOLEAN"
+	STRING_OBJ       = "STRING"
+	NULL_OBJ         = "NULL"
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
-	ERROR_OBJ = "ERROR"
-	FUNCTION_OBJ = "FUNCTION"
-	ARRAY_OBJ = "ARRAY"
+	ERROR_OBJ        = "ERROR"
+	FUNCTION_OBJ     = "FUNCTION"
+	ARRAY_OBJ        = "ARRAY"
 
 	BUILTIN_OBJ = "BUILTIN"
 )
@@ -78,7 +79,6 @@ func (a *Array) Inspect() string {
 	return out.String()
 }
 
-
 type Null struct{}
 
 func (n *Null) Type() ObjectType { return NULL_OBJ }
@@ -126,4 +126,32 @@ func (f *Function) Inspect() string {
 	out.WriteString("\n}")
 
 	return out.String()
+}
+
+type HashKey struct {
+	Type  ObjectType
+	Value uint64
+}
+
+func (b *Boolean) HashKey() HashKey {
+	var v uint64
+
+	if b.Value {
+		v = 1
+	} else {
+		v = 0
+	}
+
+	return HashKey{Type: b.Type(), Value: v}
+}
+
+func (i *Integer) HashKey() HashKey {
+	return HashKey{Type: i.Type(), Value: uint64(i.Value)}
+}
+
+func (s *String) HashKey() HashKey {
+	h := fnv.New64a()
+	h.Write([]byte(s.Value))
+
+	return HashKey{Type: s.Type(), Value: h.Sum64()}
 }

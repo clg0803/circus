@@ -84,6 +84,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.IF, p.parseIfExpression)
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
+	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
 
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
@@ -395,6 +396,32 @@ func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
 		return nil
 	}
 	return l
+}
+
+func (p *Parser) parseHashLiteral() ast.Expression {
+	h := &ast.HashLiteral{Token: p.curToken}
+	h.Pairs = make(map[ast.Expression]ast.Expression)
+
+	for !p.peekTokenIs(token.RBRACE) {
+		p.nextToken()
+		k := p.parseExpression(LOWEST)
+		if !p.exceptPeek(token.COLON) {
+			return nil
+		}
+
+		p.nextToken()
+		v := p.parseExpression(LOWEST)
+		h.Pairs[k] = v
+		if !p.peekTokenIs(token.RBRACE) && !p.exceptPeek(token.COMMA) {
+			return nil
+		}
+	}
+
+	if !p.exceptPeek(token.RBRACE) {
+		return nil
+	}
+
+	return h
 }
 
 func (p *Parser) parseFunctionParameters() []*ast.Identifier {
