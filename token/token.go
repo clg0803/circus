@@ -34,8 +34,10 @@ const (
 	LBRACE = "{"
 	RBRACE = "}"
 
-	LBRACKET = "["	// support array
+	LBRACKET = "[" // support array
 	RBRACKET = "]"
+
+	COLON = ";" // support hash
 
 	// 关键字
 	FUNCTION = "FUNCTION"
