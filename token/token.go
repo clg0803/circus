@@ -34,6 +34,9 @@ const (
 	LBRACE = "{"
 	RBRACE = "}"
 
+	LBRACKET = "["	// support array
+	RBRACKET = "]"
+
 	// 关键字
 	FUNCTION = "FUNCTION"
 	LET      = "LET"

@@ -187,6 +187,19 @@ type IfExpression struct {
 	Alternative *BlockStatement
 }
 
+type StringLiteral struct {
+	Token token.Token
+	Value string
+}
+
+func (sl *StringLiteral) expressionNode() {}
+func (sl *StringLiteral) TokenLiteral() string {
+	return sl.Token.Literal
+}
+func (sl *StringLiteral) String() string {
+	return sl.Token.Literal
+}
+
 func (ie *IfExpression) expressionNode()      {}
 func (ie *IfExpression) TokenLiteral() string { return ie.Token.Literal }
 func (ie *IfExpression) String() string {
@@ -268,15 +281,21 @@ func (ce *CallExpression) String() string {
 	return out.String()
 }
 
-type StringLiteral struct {
-	Token token.Token
-	Value string
+type ArrayLiteral struct {
+	Token    token.Token
+	Elements []Expression
 }
 
-func (sl *StringLiteral) expressionNode() {}
-func (sl *StringLiteral) TokenLiteral() string {
-	return sl.Token.Literal
-}
-func (sl *StringLiteral) String() string {
-	return sl.Token.Literal
+func (al *ArrayLiteral) expressionNode()      {}
+func (al *ArrayLiteral) TokenLiteral() string { return al.Token.Literal }
+func (al *ArrayLiteral) String() string {
+	var out bytes.Buffer
+	ele := []string{}
+	for _, el := range al.Elements {
+		ele = append(ele, el.String())
+	}
+	out.WriteString("[")
+	out.WriteString(strings.Join(ele, ", "))
+	out.WriteString("[")
+	return out.String()
 }
