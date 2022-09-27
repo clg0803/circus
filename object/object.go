@@ -19,12 +19,10 @@ const (
 	BOOLEAN_OBJ = "BOOLEAN"
 	STRING_OBJ  = "STRING"
 	NULL_OBJ    = "NULL"
-
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
-
 	ERROR_OBJ = "ERROR"
-
 	FUNCTION_OBJ = "FUNCTION"
+	ARRAY_OBJ = "ARRAY"
 
 	BUILTIN_OBJ = "BUILTIN"
 )
@@ -61,6 +59,25 @@ type String struct {
 
 func (s *String) Type() ObjectType { return STRING_OBJ }
 func (s *String) Inspect() string  { return s.Value }
+
+type Array struct {
+	Elements []Object
+}
+
+func (a *Array) Type() ObjectType { return ARRAY_OBJ }
+func (a *Array) Inspect() string {
+	var out bytes.Buffer
+	ele := []string{}
+	for _, e := range a.Elements {
+		ele = append(ele, e.Inspect())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(ele, ", "))
+	out.WriteString("]")
+	return out.String()
+}
+
 
 type Null struct{}
 
