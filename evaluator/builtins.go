@@ -1,6 +1,8 @@
 package evaluator
 
 import (
+	"fmt"
+
 	"github.com/clg0803/circus/object"
 )
 
@@ -95,6 +97,14 @@ var builtins = map[string]*object.Builtin{
 			copy(ne, arr.Elements)
 			ne[l] = args[1]
 			return &object.Array{Elements: ne}
+		},
+	},
+	"puts": {
+		Fn: func(args ...object.Object) object.Object {
+			for _, arg := range args {
+				fmt.Println(arg.Inspect())
+			}
+			return NULL
 		},
 	},
 }
